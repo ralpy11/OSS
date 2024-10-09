@@ -11,22 +11,23 @@ export default function SignUp() {
     {{
         padding:25,
         paddingTop:30,
-        backgroundColor:Colors.WHITE,
+        backgroundColor: '#003566',
         height: '100%',
         
     }}>
         <TouchableOpacity onPress={()=>router.back()}>
-            <Ionicons name="arrow-back" size={25} color="black" />
+            <Ionicons name="arrow-back" size={25} color="white" />
       </TouchableOpacity>
-      <Text style={{
+      
+      <View style={styles.container}>
+      <View >
+        <Text style={{
         fontFamily: 'outfit-bold',
-        fontSize:28,
-        marginTop:20,
+        fontSize:26,
+        marginTop:10,
+        marginBottom:20,
+        
       }}>Create New Account</Text>
-
-<View style={{
-        marginTop:30,
-      }}>
         <Text style={{
             fontFamily: 'outfit',
 
@@ -99,7 +100,7 @@ export default function SignUp() {
 
       <View style={{
         padding:15,
-        backgroundColor:Colors.PRIMARY,
+        backgroundColor: '#003566',
         borderRadius:15,
         marginTop:30,
       }}>
@@ -116,6 +117,7 @@ export default function SignUp() {
         backgroundColor:Colors.WHITE,
         borderRadius:15,
         marginTop:20,
+        marginBottom:15,
         borderWidth:1,
       }}>
         <Text style={{
@@ -123,16 +125,24 @@ export default function SignUp() {
             textAlign: 'center',
         }}>Sign In</Text>
       </TouchableOpacity>
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
     input:{
-        padding:15,
+        padding:10,
         borderWidth:1,
         borderRadius:15,
         borderColor: 'black',
         fontFamily: 'outfit',
+    },
+    container:{
+      padding:15,
+      width: '100%',
+      backgroundColor:Colors.WHITE,
+      borderWidth:1,
+      borderRadius:15,
     }
 })

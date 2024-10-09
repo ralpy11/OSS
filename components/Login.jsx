@@ -19,7 +19,7 @@ export default function Login() {
             fontSize:28,
             fontFamily:'outfit-bold',
             textAlign: 'center',
-            marginTop:10,
+            marginTop:5,
           }}>CTU-AC REQUEST MONITORING SYSTEM</Text>
           <Text style={{
             fontFamily:'outfit',
@@ -49,7 +49,7 @@ const styles = StyleSheet.create({
     height:'100%',
     borderTopRightRadius:30,
     borderTopLeftRadius:30,
-    padding:25,
+    padding:20,
   },
 
   button:{

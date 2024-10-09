@@ -20,36 +20,33 @@ export default function SignIn() {
     {{
         padding:25,
         paddingTop:40,
-        backgroundColor:Colors.WHITE,
+        backgroundColor: '#003566',
         height:'100%',
     }}>
         <TouchableOpacity onPress={()=>router.back()}>
-            <Ionicons name="arrow-back" size={25} color="black" />
+            <Ionicons name="arrow-back" size={25} color="white" />
       </TouchableOpacity>
       <Text style={{
         fontFamily: 'outfit-bold',
         fontSize:30,
-        marginTop:30,
-      }}>Let's Sign You In</Text>
-      <Text style={{
-        fontFamily: 'outfit',
-        fontSize:30,
-        color:Colors.GRAY,
-        marginTop:20,
-      }}>Welcome Back</Text>
-       <Text style={{
-        fontFamily: 'outfit',
-        fontSize:30,
-        color:Colors.GRAY,
-        marginTop:10,
-      }}>You've been missed</Text>
-      
+        marginTop:15,
+        color:Colors.WHITE,
+        textAlign: 'center'
+      }}>WELCOME TO CTU-AC REQUEST MONITORING SYSTEM</Text>
+
+      <View  style={styles.container} >
       <View style={{
-        marginTop:50,
+        marginTop:15,
+        
       }}>
         <Text style={{
+        fontFamily: 'outfit-bold',
+        fontSize:30,
+        textAlign: 'center',
+        color: '#003566'
+      }}>SIGN IN</Text>
+        <Text style={{
             fontFamily: 'outfit',
-
         }}>Email</Text>
         <TextInput
         style={styles.input} 
@@ -62,26 +59,32 @@ export default function SignIn() {
       }}>
         <Text style={{
             fontFamily: 'outfit',
+            
 
         }}>Password</Text>
         <TextInput
         secureTextEntry={true}
         style={styles.input} 
         placeholder='Enter password'/>
+        <Text style={{
+            fontFamily: 'outfit',
+        }}>Forgot password</Text>
 
       </View>
 
-      <View style={{
+      <TouchableOpacity
+        onPress={()=>router.push('(tabs)/dashboard')}
+      style={{
         padding:15,
-        backgroundColor:Colors.PRIMARY,
+        backgroundColor: '#003566',
         borderRadius:15,
-        marginTop:50,
+        marginTop:30,
       }}>
         <Text style={{
             color:Colors.WHITE,
             textAlign: 'center',
         }}>Sign In</Text>
-      </View>
+      </TouchableOpacity>
 
       <TouchableOpacity
         onPress={()=>router.replace('auth/sign-up')}
@@ -90,6 +93,7 @@ export default function SignIn() {
         backgroundColor:Colors.WHITE,
         borderRadius:15,
         marginTop:20,
+        marginBottom:20,
         borderWidth:1,
       }}>
         <Text style={{
@@ -97,6 +101,7 @@ export default function SignIn() {
             textAlign: 'center',
         }}>Create Account</Text>
       </TouchableOpacity>
+      </View>
     </View>
   )
 }
@@ -108,5 +113,13 @@ const styles = StyleSheet.create({
         borderRadius:15,
         borderColor: 'black',
         fontFamily: 'outfit',
+        color: 'white',
+    },
+    container:{
+      padding:15,
+      width: '100%',
+      backgroundColor:Colors.WHITE,
+      borderRadius:15,
+      borderColor: 'black',
     }
 })
