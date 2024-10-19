@@ -1,24 +1,23 @@
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import React, { useEffect, useState } from 'react';
-import { useNavigation, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router'; // Use only the router
 import { Colors } from './../../../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
 
 export default function SignIn() {
-    const navigation = useNavigation();
-    const router = useRouter();
+    const router = useRouter(); // Use the router
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        navigation.setOptions({
-            headerShown: false,
-        });
+        // No need to set header options as in React Navigation
     }, []);
 
     const handleSignIn = async () => {
+        setLoading(true); // Show loading state
         try {
-            const response = await fetch('http://172.28.48.51:5000/api/signin', { // Replace with your server URL
+            const response = await fetch('http://10.0.2.2:8000/login', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -26,18 +25,19 @@ export default function SignIn() {
                 body: JSON.stringify({ username, password }),
             });
 
-            const data = await response.json();
-            if (response.ok) {
-                // Handle successful login
-                Alert.alert('Login Successful', data.message);
-                router.push('(tabs)/dashboard'); // Navigate to the dashboard
+            const result = await response.json();
+
+            if (result.success) {
+                Alert.alert('Login successful!', `Welcome, ${username}!`);
+                router.replace('/dashboard'); // Use router to navigate
             } else {
-                // Handle errors (like invalid credentials)
-                Alert.alert('Login Failed', data.message);
+                Alert.alert('Invalid credentials', 'Please check your username and password.');
             }
         } catch (error) {
-            console.error('Error signing in:', error);
-            Alert.alert('Error', 'Something went wrong. Please try again.');
+            console.error('Error:', error);
+            Alert.alert('An error occurred', 'Please try again later.');
+        } finally {
+            setLoading(false); // Hide loading state
         }
     };
 
@@ -74,8 +74,8 @@ export default function SignIn() {
                     <Text style={{ fontFamily: 'outfit' }}>Forgot password?</Text>
                 </View>
 
-                <TouchableOpacity onPress={handleSignIn} style={styles.signInButton}>
-                    <Text style={{ color: Colors.WHITE, textAlign: 'center' }}>Sign In</Text>
+                <TouchableOpacity onPress={handleSignIn} style={styles.signInButton} disabled={loading}>
+                    <Text style={{ color: Colors.WHITE, textAlign: 'center' }}>{loading ? 'Signing In...' : 'Sign In'}</Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
