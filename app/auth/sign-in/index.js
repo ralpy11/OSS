@@ -1,21 +1,18 @@
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
-import React, { useEffect, useState } from 'react';
-import { useRouter } from 'expo-router'; // Use only the router
-import { Colors } from './../../../constants/Colors';
+import React, { useState } from 'react';
+import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import Ionicons from '@expo/vector-icons/Ionicons';
+import { Colors } from './../../../constants/Colors';
 
 export default function SignIn() {
-    const router = useRouter(); // Use the router
+    const router = useRouter();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
-        // No need to set header options as in React Navigation
-    }, []);
-
     const handleSignIn = async () => {
-        setLoading(true); // Show loading state
+        setLoading(true);
         try {
             const response = await fetch('http://10.0.2.2:8000/login', {
                 method: 'POST',
@@ -28,8 +25,10 @@ export default function SignIn() {
             const result = await response.json();
 
             if (result.success) {
+                await AsyncStorage.setItem('username', username);
+                await AsyncStorage.setItem('userData', JSON.stringify(result.user));
                 Alert.alert('Login successful!', `Welcome, ${username}!`);
-                router.replace('/dashboard'); // Use router to navigate
+                router.replace('/dashboard');
             } else {
                 Alert.alert('Invalid credentials', 'Please check your username and password.');
             }
@@ -37,7 +36,7 @@ export default function SignIn() {
             console.error('Error:', error);
             Alert.alert('An error occurred', 'Please try again later.');
         } finally {
-            setLoading(false); // Hide loading state
+            setLoading(false);
         }
     };
 
