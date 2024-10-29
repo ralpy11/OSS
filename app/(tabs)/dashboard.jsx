@@ -1,5 +1,6 @@
 import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
 import React, { useEffect, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
 import { Colors } from '../../constants/Colors';
 import Ionicons from '@expo/vector-icons/Ionicons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -9,25 +10,52 @@ export default function Dashboard() {
     const [username, setUsername] = useState('');
     const [budget, setBudget] = useState(null);
     const [loading, setLoading] = useState(true);
+    const [data, setData] = useState([]);
+    const navigation = useNavigation();
 
     useEffect(() => {
         const fetchUserData = async () => {
+            setLoading(true);
             try {
+
                 const storedUserData = await AsyncStorage.getItem('userData');
                 if (storedUserData) {
                     const user = JSON.parse(storedUserData);
                     setUsername(user.username);
                     setBudget(user.budget);
                 }
+
+
+                const storedBudget = await AsyncStorage.getItem('budget');
+                if (storedBudget !== null) {
+                    setBudget(JSON.parse(storedBudget));
+                }
+
+
+                const response = await fetch(`http://10.0.2.2:8000/accounts_checkout`);
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                const jsonData = await response.json();
+                setData(jsonData);
             } catch (error) {
-                console.error("Error retrieving user data:", error);
-            } finally {
+                console.error('Error fetching data:', error);
+            }
+            finally {
                 setLoading(false);
             }
         };
 
         fetchUserData();
     }, []);
+
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
+        return date.toLocaleDateString(undefined, options);
+    };
+
+
 
     if (loading) {
         return (
@@ -70,16 +98,16 @@ export default function Dashboard() {
                     </Text>
                 </View>
 
-            
                 <View style={styles.detailsContainer}>
-                    <View style={styles.ppmp}>
-                        <Text style={{
-                            fontFamily: 'outfit-bold',
-                            fontSize: 25,
-                            textAlign: 'center',
-                            color: 'white',
-                        }}>2023 PPMP</Text>
-                    </View>
+
+                    {data.length > 0 ? (
+                        data.map((item, index) => (
+                            <Text style={styles.title}>{item.year} PPMP </Text>
+                        ))
+                    ) : (
+                        <Text style={styles.noDataText}>No details available</Text>
+                    )}
+
                 </View>
             </View>
 
@@ -90,10 +118,25 @@ export default function Dashboard() {
                     textAlign: 'center',
                     color: Colors.WHITE,
                 }}>PPMP Tracker</Text>
-                <Text style={{ color: Colors.WHITE, fontSize: 13 }}>PPMP Submitted</Text>
-                <Text style={{ color: Colors.WHITE, fontSize: 13 }}>PPMP Tracker</Text>
-                <Text style={{ color: Colors.WHITE, fontSize: 13 }}>Date Approved</Text>
+                {data.length > 0 ? (
+                    data.map((item, index) => (
+                        <View key={index} style={styles.itemContainer}>
+                            <Text style={{ color: Colors.WHITE, fontSize: 13 }}>
+                                PPMP Submitted: {formatDate(item.submission_date)}
+                            </Text>
+                            <Text style={{ color: Colors.WHITE, fontSize: 13 }}>
+                                Approved by Budget Officer: {formatDate(item.bo_approved_date)}
+                            </Text>
+                            <Text style={{ color: Colors.WHITE, fontSize: 13 }}>
+                                Approved by Campus Director: {formatDate(item.cd_approved_date)}
+                            </Text>
+                        </View>
+                    ))
+                ) : (
+                    <Text style={styles.noDataText}>No details available</Text>
+                )}
             </View>
+
 
             <View style={styles.prtracker}>
                 <Text style={{
@@ -109,7 +152,7 @@ export default function Dashboard() {
 
             <View style={styles.catalogue}>
                 <Text style={styles.title}>CATALOGUE</Text>
-               
+
                 <View style={styles.row}>
                     <Text style={styles.header}>Name</Text>
                     <Text style={styles.header}>Description</Text>
@@ -171,7 +214,7 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: '#003566',
         borderRadius: 5,
-        padding: 10,
+        paddingTop: 25,
     },
     ppmp: {
         marginTop: 5,
