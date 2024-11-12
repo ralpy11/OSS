@@ -41,7 +41,7 @@ export default function PPMP() {
                 }}>Catalogue</Text>
             </View>
 
-            {/* Budget Details Container */}
+         
             <View style={styles.ppmpContainer}>
                 <View style={styles.ppmp}>
                     <Text style={{

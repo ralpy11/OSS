@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet, Image, ActivityIndicator } from 'react-native';
+import { View, Text, StyleSheet, Image, ActivityIndicator, FlatList } from 'react-native';
 import React, { useEffect, useState } from 'react';
 import { useNavigation } from '@react-navigation/native';
 import { Colors } from '../../constants/Colors';
@@ -11,13 +11,14 @@ export default function Dashboard() {
     const [budget, setBudget] = useState(null);
     const [loading, setLoading] = useState(true);
     const [data, setData] = useState([]);
+    const [accountsData, setAccountsData] = useState([]); // Define accountsData state
     const navigation = useNavigation();
 
     useEffect(() => {
         const fetchUserData = async () => {
             setLoading(true);
             try {
-
+             
                 const storedUserData = await AsyncStorage.getItem('userData');
                 if (storedUserData) {
                     const user = JSON.parse(storedUserData);
@@ -25,37 +26,42 @@ export default function Dashboard() {
                     setBudget(user.budget);
                 }
 
-
+       
                 const storedBudget = await AsyncStorage.getItem('budget');
                 if (storedBudget !== null) {
                     setBudget(JSON.parse(storedBudget));
                 }
 
-
+           
                 const response = await fetch(`http://10.0.2.2:8000/accounts_checkout`);
                 if (!response.ok) {
                     throw new Error('Network response was not ok');
                 }
                 const jsonData = await response.json();
                 setData(jsonData);
+
+                
+                const csvResponse = await fetch(`http://10.0.2.2:8000/accounts_csv`);
+                if (!csvResponse.ok) {
+                    throw new Error('Failed to fetch accounts CSV');
+                }
+                const csvData = await csvResponse.json();
+                setAccountsData(csvData); 
             } catch (error) {
                 console.error('Error fetching data:', error);
-            }
-            finally {
+            } finally {
                 setLoading(false);
             }
         };
 
-        fetchUserData();
-    }, []);
+        fetchUserData(); 
+    }, []); 
 
     const formatDate = (dateString) => {
         const date = new Date(dateString);
         const options = { year: 'numeric', month: '2-digit', day: '2-digit' };
         return date.toLocaleDateString(undefined, options);
     };
-
-
 
     if (loading) {
         return (
@@ -65,7 +71,6 @@ export default function Dashboard() {
             </View>
         );
     }
-
     return (
         <View>
             <View style={styles.main}>
@@ -159,22 +164,22 @@ export default function Dashboard() {
                     <Text style={styles.header}>Unit</Text>
                     <Text style={styles.header}>Price</Text>
                 </View>
-                <View style={styles.category}>
-                    <Text style={styles.catitle}>Category</Text>
-                </View>
 
-                <View style={styles.row}>
-                    <Text style={styles.cell}>Item 1</Text>
-                    <Text style={styles.cell}>Description of Item 1</Text>
-                    <Text style={styles.cell}>Units</Text>
-                    <Text style={styles.cell}>$10.00</Text>
-                </View>
-                <View style={styles.row}>
-                    <Text style={styles.cell}>Item 2</Text>
-                    <Text style={styles.cell}>Description of Item 2</Text>
-                    <Text style={styles.cell}>Units</Text>
-                    <Text style={styles.cell}>$15.00</Text>
-                </View>
+               
+
+                <FlatList
+                    data={accountsData}
+                    keyExtractor={(item) => item.id.toString()} 
+                    renderItem={({ item }) => (
+                        <View style={styles.row}>
+                            <Text style={styles.cell}>{item.Item_name}</Text> 
+                            <Text style={styles.cell}>{item.Item_Brand}</Text> 
+                            <Text style={styles.cell}>{item.Unit}</Text> 
+                            <Text style={styles.cell}>{item.Price ? item.Price.toFixed(2) : 'N/A'}</Text>
+
+                        </View>
+                    )}
+                />
             </View>
         </View>
     );

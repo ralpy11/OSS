@@ -1,4 +1,4 @@
-import { View, Text, StyleSheet,Image, TextInput } from 'react-native'
+import { View, Text, StyleSheet,Image} from 'react-native'
 import React from 'react'
 import Ionicons from '@expo/vector-icons/Ionicons';
 import { Colors } from '../../constants/Colors'

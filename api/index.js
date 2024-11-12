@@ -69,22 +69,22 @@ mongoose.connect('mongodb://duhig:duhig123@172.28.48.51:27017/inventory?authSour
         const CheckoutItems = mongoose.model('CheckoutItems', checkoutitemsSchema);
 
         const itemSchema = new mongoose.Schema({
-            item : { type: String, required: true },
+            item: { type: String, required: true },
             item_brand_description: { type: String, required: true },
             unit: { type: String, required: true },
             item_cost: { type: Number, required: true },
-            submission_date : { type: Date, required: true },
+            submission_date: { type: Date, required: true },
         }, { collection: 'accounts_item' });
 
         const Item = mongoose.model('Item', itemSchema);
 
         const csvSchema = new mongoose.Schema({
-            Category : { type: String, required: true },
-            Item_name : { type: String, required: true },
-            Item_Brand : { type: String, required: true },
-            Unit : { type: String, required: true },
-            Price : { type: Number, required: true },
-            item_id : { type: String, required: true },
+            Category: { type: String, required: true },
+            Item_name: { type: String, required: true },
+            Item_Brand: { type: String, required: true },
+            Unit: { type: String, required: true },
+            Price: { type: Number, required: true },
+            item_id: { type: String, required: true },
         }, { collection: 'accounts_csv' });
 
         const Csv = mongoose.model('Csv', csvSchema);
@@ -114,13 +114,13 @@ mongoose.connect('mongodb://duhig:duhig123@172.28.48.51:27017/inventory?authSour
         });
 
         app.get('/accounts_checkout', async (req, res) => {
-            console.log('GET /accounts_checkout called');
             try {
                 const checkouts = await Checkout.find({
-                    user: req.query.user,
+                    user_id: req.query.user,
                     cd_status: 'approved',
                     bo_status: 'approved'
                 });
+
                 res.json(checkouts);
             } catch (error) {
                 console.error('Error fetching checkouts:', error);
@@ -128,17 +128,31 @@ mongoose.connect('mongodb://duhig:duhig123@172.28.48.51:27017/inventory?authSour
             }
         });
 
+
+
         app.get('/accounts_csv', async (req, res) => {
             console.log('GET /accounts_csv called');
             try {
                 const csvs = await Csv.find();
-                res.json(csvs);
+
+
+                const groupedByCategory = csvs.reduce((acc, item) => {
+                    const category = item.category || 'Uncategorized';
+                    if (!acc[category]) {
+                        acc[category] = [];
+                    }
+                    acc[category].push(item);
+                    return acc;
+                }, {});
+
+                res.json(groupedByCategory);
             } catch (error) {
                 console.error('Error fetching csvs:', error);
                 res.status(500).json({ message: error.message });
             }
         });
-        
+
+
 
         app.get('/accounts_user', async (req, res) => {
             try {
@@ -148,86 +162,21 @@ mongoose.connect('mongodb://duhig:duhig123@172.28.48.51:27017/inventory?authSour
                 res.status(500).json({ message: error.message });
             }
         });
-
-        app.post('/login', async (req, res) => {
-            const { username, password } = req.body;
-
+       app.post('/login', async (req, res) => {
             try {
-                const user = await User.findOne({ username, password });
-                if (user) {
-                    res.json({
-                        success: true,
-                        user: {
-                            username: user.username,
-                            first_name: user.first_name,
-                            last_name: user.last_name,
-                            budget: user.budget,
-                            email: user.email,
-                            contact1: user.contact1,
-                            user_type: user.user_type,
-                        }
-                    });
-                } else {
-                    res.status(401).json({ success: false, message: 'Invalid credentials' });
-                }
-            } catch (error) {
-                console.error("Error during login:", error);
-                res.status(500).json({ success: false, message: 'Internal server error' });
-            }
-        });
-
-        app.get('/dashboard/:username', async (req, res) => {
-            const { username } = req.params;
-
-            try {
-                // Find the user by username
+                const { username, password } = req.body;
                 const user = await User.findOne({ username });
                 if (!user) {
-                    return res.status(404).json({ success: false, message: 'User not found' });
+                    return res.status(401).json({ message: 'Invalid username or password' });
                 }
-
-                console.log("User found:", user); // Log user details
-
-                // Find all checkouts with approved cd_status and bo_status for the user
-                const approvedCheckouts = await Checkout.find({
-                    userId: user._id,
-                    cd_status: 'approved',
-                    bo_status: 'approved'
-                }).sort({ year: -1 }); // Sort by year descending
-
-                console.log("Approved Checkouts found:", approvedCheckouts); // Log the approved checkouts
-
-                // Check if any approved checkouts were found
-                if (approvedCheckouts.length === 0) {
-                    return res.status(404).json({ success: false, message: 'No approved checkouts found' });
+                if (user.password !== password) {
+                    return res.status(401).json({ message: 'Invalid username or password' });
                 }
-
-                // Log the response data
-                const responseData = {
-                    success: true,
-                    user: {
-                        username: user.username,
-                        first_name: user.first_name,
-                        last_name: user.last_name,
-                        budget: user.budget,
-                        email: user.email,
-                        contact1: user.contact1,
-                        user_type: user.user_type,
-                    },
-                    approvedCheckouts: approvedCheckouts // Include all approved checkouts
-                };
-                console.log("Response Data:", responseData); // Log response data
-
-                res.json(responseData);
-
+                res.json({ message: 'Login successful' });
             } catch (error) {
-                console.error("Error fetching user data:", error);
-                res.status(500).json({ success: false, message: 'Internal server error' });
+                res.status(500).json({ message: error.message });
             }
         });
-
-
-
     })
     .catch((error) => {
         console.log("Error connecting to MongoDB", error);

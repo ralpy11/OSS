@@ -22,9 +22,14 @@ export default function SignIn() {
                 body: JSON.stringify({ username, password }),
             });
 
-            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(`HTTP status ${response.status}`);
+            }
 
-            if (result.success) {
+            const result = await response.json();
+            console.log('Response:', result); 
+
+            if (result && result.success) {
                 await AsyncStorage.setItem('username', username);
                 await AsyncStorage.setItem('userData', JSON.stringify(result.user));
                 Alert.alert('Login successful!', `Welcome, ${username}!`);
@@ -33,12 +38,13 @@ export default function SignIn() {
                 Alert.alert('Invalid credentials', 'Please check your username and password.');
             }
         } catch (error) {
-            console.error('Error:', error);
+            console.error('Error:', error); 
             Alert.alert('An error occurred', 'Please try again later.');
         } finally {
             setLoading(false);
         }
     };
+
 
     return (
         <View style={{ padding: 25, paddingTop: 40, backgroundColor: '#003566', height: '100%' }}>
